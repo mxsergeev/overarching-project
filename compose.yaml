@@ -1,7 +1,7 @@
 services:
   client:
     build: client
-    restart: unless-stopped
+    restart: on-failure
     volumes:
       - ./client:/app
       - /app/node_modules
@@ -13,7 +13,7 @@ services:
   database:
     container_name: wsd_project_database
     image: postgres:17.0
-    restart: unless-stopped
+    restart: on-failure
     env_file:
       - project.env
 
@@ -38,7 +38,7 @@ services:
 
   server:
     build: server
-    restart: unless-stopped
+    restart: on-failure
     volumes:
       - ./server:/app
     ports:
