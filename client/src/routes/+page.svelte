@@ -1,9 +1,5 @@
 <script>
-  import Header from "$lib/components/Header.svelte";
-  import Message from "$lib/components/Message.svelte";
-  import Footer from "$lib/components/Footer.svelte";
+  import Questions from "$lib/components/Questions.svelte";
 </script>
 
-<Header />
-<Message />
-<Footer />
+<Questions />
