@@ -4,6 +4,19 @@ import { logger } from "@hono/hono/logger";
 
 const app = new Hono();
 
+/**
+ * @typedef {object} Question
+ * @property {number} id
+ * @property {string} title
+ * @property {string} text
+ * @property {number} upvotes
+ */
+
+/**
+ * @type {Question[]}
+ */
+let questions = [];
+
 app.use("/*", cors());
 app.use("/*", logger());
 
@@ -11,10 +24,13 @@ app.get("/", (c) => c.json({ message: "Hello world!" }));
 
 app.get("/courses", (c) => {
   const courses = {
-    "courses": [{ "id": 1, "name": "Web Software Development" }, {
-      "id": 2,
-      "name": "Device-Agnostic Design",
-    }],
+    courses: [
+      { id: 1, name: "Web Software Development" },
+      {
+        id: 2,
+        name: "Device-Agnostic Design",
+      },
+    ],
   };
 
   return c.json(courses);
@@ -22,7 +38,7 @@ app.get("/courses", (c) => {
 
 app.get("/courses/:id", (c) => {
   const courses = {
-    "course": { "id": Number(c.req.param("id")), "name": "Course Name" },
+    course: { id: Number(c.req.param("id")), name: "Course Name" },
   };
 
   return c.json(courses);
@@ -39,32 +55,47 @@ app.post("/courses", async (c) => {
   return c.json({ course });
 });
 
-app.get("/courses/:id/topics", (c) => {
-  const topics = {
-    "topics": [{ "id": 1, "name": "Topic 1" }, { "id": 2, "name": "Topic 2" }],
-  };
-
-  return c.json(topics);
+app.get("/courses/:id/questions", (c) => {
+  return c.json(questions);
 });
 
-app.get("/courses/:cId/topics/:tId/posts", (c) => {
-  const posts = {
-    "posts": [{ "id": 1, "title": "Post 1" }, { "id": 2, "title": "Post 2" }],
+app.post("/courses/:id/questions", async (c) => {
+  const data = await c.req.json();
+
+  const maxId = Math.max(...questions.map((q) => q.id));
+
+  let id = maxId + 1;
+
+  if (!isFinite(id)) {
+    id = 1;
+  }
+
+  const newQuestion = {
+    id,
+    title: data.title,
+    text: data.text,
+    upvotes: 0,
   };
 
-  return c.json(posts);
+  questions.push(newQuestion);
+
+  return c.json(newQuestion);
 });
 
-app.get("/courses/:cId/topics/:tId/posts/:pId", (c) => {
-  const post = {
-    "post": { "id": Number(c.req.param("pId")), "title": "Post Title" },
-    "answers": [{ "id": 1, "content": "Answer 1" }, {
-      "id": 2,
-      "content": "Answer 2",
-    }],
-  };
+app.post("/courses/:id/questions/:qId/upvote", (c) => {
+  const question = questions.find((q) => q.id === Number(c.req.param("qId")));
 
-  return c.json(post);
+  question.upvotes++;
+
+  return c.json(question);
+});
+
+app.delete("/courses/:id/questions/:qId", (c) => {
+  const question = questions.find((q) => q.id === Number(c.req.param("qId")));
+
+  questions = questions.filter((q) => q.id !== question.id);
+
+  return c.json(question);
 });
 
 export default app;
