@@ -3,12 +3,12 @@
 
   let questionState = useQuestionState();
 
-  function addQuestion(e) {
+  async function addQuestion(e) {
     e.preventDefault();
 
     const q = Object.fromEntries(new FormData(e.target));
 
-    questionState.add(q);
+    await questionState.add(q);
 
     e.target.reset();
   }
@@ -22,7 +22,7 @@
 
   <div>
     <label for="question">Question</label>
-    <textarea id="question" name="question"></textarea>
+    <textarea id="question" name="text"></textarea>
   </div>
 
   <button type="submit">Submit</button>

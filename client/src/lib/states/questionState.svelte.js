@@ -1,17 +1,20 @@
 import { browser } from "$app/environment";
+import {
+  addQuestion,
+  loadQuestions,
+  removeQuestion,
+  upvoteQuestion,
+} from "$lib/apis/questions-api";
 
 const LOCATION_STATE_KEY = "questionState";
 
 let initState = [];
-if (browser && localStorage.hasOwnProperty(LOCATION_STATE_KEY)) {
-  initState = JSON.parse(localStorage.getItem(LOCATION_STATE_KEY));
+
+if (browser) {
+  initState = await loadQuestions();
 }
 
 let state = $state(initState);
-
-const saveToLocalStorage = () => {
-  localStorage.setItem(LOCATION_STATE_KEY, JSON.stringify(state));
-};
 
 const useQuestionState = () => {
   return {
@@ -22,35 +25,30 @@ const useQuestionState = () => {
     /**
      * @param {object} question
      * @param {string} question.title
-     * @param {string} question.question
+     * @param {string} question.text
      */
-    add: (question) => {
-      const q = { ...question };
+    add: async (question) => {
+      const newQuestion = await addQuestion(question);
 
-      q.id = crypto.randomUUID();
-      q.upvotes = 0;
-
-      state.push(q);
-
-      saveToLocalStorage();
+      state.push(newQuestion);
     },
 
-    remove: (question) => {
-      state = state.filter((q) => q.id !== question.id);
+    remove: async (question) => {
+      const removedQuestion = await removeQuestion(question.id);
 
-      saveToLocalStorage();
+      state = state.filter((q) => q.id !== removedQuestion.id);
     },
 
-    upvote: (question) => {
+    upvote: async (question) => {
+      const upvotedQuestion = await upvoteQuestion(question.id);
+
       state = state.map((q) => {
-        if (q.id !== question.id) {
+        if (q.id !== upvotedQuestion.id) {
           return q;
         }
 
-        return { ...q, upvotes: q.upvotes + 1 };
+        return upvotedQuestion;
       });
-
-      saveToLocalStorage();
     },
   };
 };

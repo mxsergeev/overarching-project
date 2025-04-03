@@ -8,7 +8,11 @@
 
 <div>
   <h2>{question.title}</h2>
-  <button onclick={() => questionState.remove(question)}>Delete</button>
-  <button onclick={() => questionState.upvote(question)}>Upvote</button>
+  <button onclick={async () => await questionState.remove(question)}
+    >Delete</button
+  >
+  <button onclick={async () => await questionState.upvote(question)}
+    >Upvote</button
+  >
   <div>Upvotes: {question.upvotes}</div>
 </div>
