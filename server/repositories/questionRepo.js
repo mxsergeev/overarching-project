@@ -32,6 +32,7 @@ export async function remove(id) {
   const result = await sql`
     DELETE FROM questions
     WHERE id = ${id}
+    RETURNING *;
   `;
 
   return result[0];

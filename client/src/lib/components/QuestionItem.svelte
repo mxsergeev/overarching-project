@@ -1,9 +1,9 @@
 <script>
   import { useQuestionState } from "$lib/states/questionState.svelte";
 
-  let questionState = useQuestionState();
+  const { courseId, question } = $props();
 
-  let { question } = $props();
+  let questionState = useQuestionState(courseId);
 </script>
 
 <div>

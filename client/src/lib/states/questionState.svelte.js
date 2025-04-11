@@ -6,43 +6,61 @@ import {
   upvoteQuestion,
 } from "$lib/apis/questions-api";
 
-const LOCATION_STATE_KEY = "questionState";
+let questionsByCourse = $state({});
+let loadStateByCourse = $state({});
 
-let initState = [];
+const useQuestionState = (courseId) => {
+  $effect(async () => {
+    if (!loadStateByCourse[courseId]) {
+      loadStateByCourse[courseId] = {};
+    }
 
-if (browser) {
-  initState = await loadQuestions();
-}
+    let loadState = loadStateByCourse[courseId];
 
-let state = $state(initState);
+    if (loadState.loading || loadState.loaded) {
+      return;
+    }
 
-const useQuestionState = () => {
+    loadState.loading = true;
+    loadState.loaded = false;
+
+    const questions = await loadQuestions(courseId);
+
+    questionsByCourse[courseId] = questions;
+
+    loadState.loading = false;
+    loadState.loaded = true;
+  });
+
   return {
     get questions() {
-      return state;
+      return questionsByCourse[courseId] || [];
     },
 
     /**
      * @param {object} question
+     * @param {string} question.courseId
      * @param {string} question.title
      * @param {string} question.text
      */
     add: async (question) => {
-      const newQuestion = await addQuestion(question);
+      const newQuestion = await addQuestion(courseId, question);
 
-      state.push(newQuestion);
+      questionsByCourse[courseId].push(newQuestion);
     },
 
     remove: async (question) => {
-      const removedQuestion = await removeQuestion(question.id);
+      const removedQuestion = await removeQuestion(courseId, question.id);
 
-      state = state.filter((q) => q.id !== removedQuestion.id);
+      questionsByCourse[courseId] = questionsByCourse[courseId].filter(
+        (q) => q.id !== removedQuestion.id
+      );
     },
 
     upvote: async (question) => {
-      const upvotedQuestion = await upvoteQuestion(question.id);
+      const upvotedQuestion = await upvoteQuestion(courseId, question.id);
 
-      state = state.map((q) => {
+      questionsByCourse[courseId] = questionsByCourse[courseId].map((q) => {
         if (q.id !== upvotedQuestion.id) {
           return q;
         }

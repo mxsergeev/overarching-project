@@ -1,7 +1,9 @@
 <script>
   import { useQuestionState } from "$lib/states/questionState.svelte";
 
-  let questionState = useQuestionState();
+  const { courseId } = $props();
+
+  let questionState = useQuestionState(courseId);
 
   async function addQuestion(e) {
     e.preventDefault();
